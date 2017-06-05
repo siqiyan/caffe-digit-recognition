@@ -94,8 +94,9 @@ if __name__ == '__main__':
     for img in ['1.png', '2.png', '3.png', '4.png', '5.png', '6.png', '7.png', '8.png', '9.png']:
     # while True:
         using_image = 'test/'+img
+        start = time.time()
         if using_image == None:
-            start = time.time()
+            # start = time.time()
             _, frame = cam.read()
         else:
             frame = cv2.imread(using_image)
@@ -153,7 +154,8 @@ if __name__ == '__main__':
             pass
 
         prediction = np.argmax(prob)
-        print prediction
+        duration = time.time() - start
+        print '%d in %fs'%(prediction, duration)
         # if prediction > 6:
             # print prediction
             # break
