@@ -48,14 +48,6 @@ def load_utyte(root, images_ubyte, labels_ubyte):
         labels.append(struct.unpack('@B', ubyte[i])[0])
     return data, labels
 
-def random_rotate(img):
-    # assert len(img.shape) == 2
-    # h, w = img.shape
-    # theta = (random.random() * 2 - 1) * 45 # range (-45, 45) degree
-    # M = cv2.getRotationMatrix2D((h/2, w/2), theta, 1)
-    # img = cv2.warpAffine(img, M, (w, h))
-    return img
-
 def change_ratio(img):
     # assert len(img.shape) == 2
     # h, w = img.shape
@@ -77,11 +69,30 @@ def random_shift(img):
     img = cv2.warpAffine(img, M, (w, h))
     return img
 
+def add_black_edges(img):
+    """
+    Reduce the effect of black edges around the image
+    Note: currently the black has value 255, because in the final statge the
+        color will be inverted and the black will be 0
+    """
+    assert len(img.shape) == 2
+    h, w = img.shape
+    pts1 = np.float32([[0,0], [w, 0], [0, h]])
+    offset = random.uniform(0, h * 0.1)
+    pts2 = np.float32([[offset,offset], [w-offset,offset], [offset,h-offset]])
+    M = cv2.getAffineTransform(pts1, pts2)
+    img = cv2.warpAffine(img, M, (w, h), borderValue=255)
+    return img
+
+def random_rotate(img):
+    assert len(img.shape) == 2
+    h, w = img.shape
+    theta = (random.random() * 2 - 1) * 8 # range (-8, 8) degree
+    M = cv2.getRotationMatrix2D((h/2, w/2), theta, 1)
+    img = cv2.warpAffine(img, M, (w, h), borderValue=255)
+    return img
+
 def change_intensity(img):
-    # digit = digit.astype(np.int32) + np.random.randint(-80,80)
-    # digit[digit < 0] = 0
-    # digit[digit > 255] = 255
-    # output = digit.astype(np.uint8)
     img = img.astype(np.int32) + np.random.randint(-80, 80)
     img[img < 0] = 0
     img[img > 255] = 255
@@ -95,7 +106,14 @@ def add_noise(img):
     img[img > 255] = 255.0
     return img.astype(np.uint8)
 
-Transformations = [random_rotate, change_ratio, random_shift, change_intensity, add_noise]
+Transformations = [
+        # change_ratio,
+        random_shift,
+        add_black_edges,
+        random_rotate,
+        change_intensity,
+        add_noise
+        ]
 
 def generate_images(data, labels, data_size, name):
     root = 'dataset'

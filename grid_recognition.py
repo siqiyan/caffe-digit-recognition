@@ -202,6 +202,7 @@ def filter_outlier_boxes(contours, rects, number_boxes):
 def caffe_forward_pass(img):
     global net, transformer
     input_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # input_img = preprocessing_for_number_searching(img)
     input_img = input_img.astype(np.float32) / 255.0
     input_img = imresize(input_img, [image_h, image_w])
     net.blobs['data'].data[...] = transformer.preprocess('data', input_img)
@@ -218,7 +219,7 @@ def region_of_interest(img, box):
     x1 = int(round(x1))
     y0 = int(round(y0))
     y1 = int(round(y1))
-    roi = img[y0:y1, x0:x1]
+    roi = img[y0:y1, x0:x1, ...]
     return roi
 
 
